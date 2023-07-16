@@ -61,7 +61,8 @@ const login = catchAsync(async function (req, res, next) {
       Date.now() + process.env.JWT_REFRESH_TOKEN_EXPIRES_IN * 60 * 1000
     ),
     httpOnly: true,
-    sameSite: false,
+    sameSite: "none",
+    secure: true,
   });
 
   // SEND ACCESS TOKEN AS PART OF JSON WITH JWT KEY
