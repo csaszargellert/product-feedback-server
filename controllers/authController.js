@@ -56,14 +56,20 @@ const login = catchAsync(async function (req, res, next) {
   foundUser.refreshToken = undefined;
 
   // SEND REFRESH TOKEN AS HTTPY ONLY COOKIE
-  res.cookie("jwt", refreshToken, {
-    expires: new Date(
+  // res.cookie("jwt", refreshToken, {
+  //   expires: new Date(
+  //     Date.now() + process.env.JWT_REFRESH_TOKEN_EXPIRES_IN * 60 * 1000
+  //   ),
+  //   httpOnly: true,
+  //   sameSite: "none",
+  //   secure: true,
+  // });
+  res.setHeader(
+    "Set-Cookie",
+    `jwt=${refrehToken}; SameSite=None; Secure; HttpOnly; Expires=${new Date(
       Date.now() + process.env.JWT_REFRESH_TOKEN_EXPIRES_IN * 60 * 1000
-    ),
-    httpOnly: true,
-    sameSite: "none",
-    secure: true,
-  });
+    )}`
+  );
 
   // SEND ACCESS TOKEN AS PART OF JSON WITH JWT KEY
   res.status(200).json({ success: true, data: foundUser, jwt: accessToken });
