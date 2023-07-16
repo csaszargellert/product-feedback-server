@@ -66,7 +66,7 @@ const login = catchAsync(async function (req, res, next) {
   // });
   res.setHeader(
     "Set-Cookie",
-    `jwt=${refrehToken}; SameSite=None; Secure; HttpOnly; Expires=${new Date(
+    `jwt=${refreshToken}; SameSite=None; Secure; HttpOnly; Expires=${new Date(
       Date.now() + process.env.JWT_REFRESH_TOKEN_EXPIRES_IN * 60 * 1000
     )}`
   );
