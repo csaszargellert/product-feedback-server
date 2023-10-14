@@ -20,7 +20,11 @@ router.use(authorizeUser);
 
 router.post("/add", addFeedback);
 
-router.route("/edit/:feedbackId").put(editFeedback).delete(deleteFeedback);
+router
+  .route("/edit/:feedbackId")
+  .get(getFeedback)
+  .put(editFeedback)
+  .delete(deleteFeedback);
 
 router.post("/:feedbackId/comment", createComment);
 router.post("/:feedbackId/comment/:commentId/reply", createReply);

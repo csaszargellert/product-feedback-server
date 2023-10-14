@@ -5,15 +5,31 @@ const Comment = require("../models/commentModel");
 const catchAsync = require("../helpers/catchAsync");
 const AppError = require("../helpers/AppError");
 
+const convertSortQuery = function (sortQuery) {
+  let queryString = "";
+  if (sortQuery === "Most Upvotes") {
+    queryString = "-upvotes";
+  } else if (sortQuery === "Least Upvotes") {
+    queryString = "upvotes";
+  } else if (sortQuery === "Most Comments") {
+    queryString = "-comments";
+  } else if (sortQuery === "Least Comments") {
+    queryString = "comments";
+  }
+  return queryString;
+};
+
 const getAllFeedbacks = catchAsync(async function (req, res, next) {
-  const { category } = req.query;
+  const { category, sort } = req.query;
 
   let feedbackQuery = Feedback.find();
 
   if (category !== "All") {
     feedbackQuery = feedbackQuery.where("category", category);
   }
-  const feedbacks = await feedbackQuery.exec();
+
+  const convertedSortQuery = convertSortQuery(sort);
+  const feedbacks = await feedbackQuery.sort(convertedSortQuery).exec();
 
   const statuses = await Feedback.getDocsNumByStatus(category);
 
@@ -23,7 +39,6 @@ const getAllFeedbacks = catchAsync(async function (req, res, next) {
 const addFeedback = catchAsync(async function (req, res, next) {
   const { title, category, detail } = req.body;
   const user = req.user;
-
   const newFeedback = new Feedback({
     title,
     category,
@@ -35,7 +50,6 @@ const addFeedback = catchAsync(async function (req, res, next) {
 
   user.feedbacks.push(savedFeedback.id);
   await user.save({ validateModifiedOnly: true });
-
   res.status(201).json({ success: true, data: savedFeedback });
 });
 
@@ -74,7 +88,10 @@ const getFeedback = catchAsync(async function (req, res, next) {
     .populate({
       path: "comments",
       select: "content replies user",
-      populate: { path: "user replies.user", select: "photo username" },
+      populate: {
+        path: "user replies.user",
+        select: "photo username name replyToWhom",
+      },
     });
 
   if (!foundFeedback) throw new AppError("Could not find document", 404);

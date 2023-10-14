@@ -3,6 +3,7 @@ const { Schema, model } = mongoose;
 
 const replySchema = new Schema(
   {
+    replyToWhom: String,
     content: String,
     user: {
       type: mongoose.SchemaTypes.ObjectId,

@@ -4,9 +4,9 @@ const AppError = require("../helpers/AppError");
 const catchAsync = require("../helpers/catchAsync");
 
 const createComment = catchAsync(async function (req, res, next) {
-  const { content } = req.body;
+  const { comment } = req.body;
 
-  if (!content) throw new AppError("Comment cannot be empty", 400);
+  if (!comment) throw new AppError("Comment cannot be empty", 400);
 
   const { feedbackId } = req.params;
 
@@ -17,7 +17,7 @@ const createComment = catchAsync(async function (req, res, next) {
   const user = req.user;
 
   const newComment = new Comment({
-    content,
+    content: comment,
     user: user.id,
     feedback: feedbackId,
   });
@@ -34,9 +34,9 @@ const createComment = catchAsync(async function (req, res, next) {
 });
 
 const createReply = catchAsync(async function (req, res, next) {
-  const { content } = req.body;
+  const { reply, replyToWhom } = req.body;
 
-  if (!content) throw new AppError("Comment cannot be empty", 400);
+  if (!reply) throw new AppError("Comment cannot be empty", 400);
 
   const { feedbackId, commentId } = req.params;
 
@@ -49,7 +49,7 @@ const createReply = catchAsync(async function (req, res, next) {
   const updatedCommentWithReply = await Comment.findByIdAndUpdate(
     commentId,
     {
-      $push: { replies: { content, user: user.id } },
+      $push: { replies: { content: reply, user: user.id, replyToWhom } },
     },
     { new: true }
   );

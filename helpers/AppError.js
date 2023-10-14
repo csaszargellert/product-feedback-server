@@ -5,10 +5,4 @@ class AppError extends Error {
   }
 }
 
-// const AppError = function (errorMessage, errorCode) {
-//   const error = new Error(errorMessage);
-//   error.statusCode = errorCode || 500;
-//   return error;
-// };
-
 module.exports = AppError;

@@ -24,6 +24,7 @@ app.get("/api/refresh-token", refreshTokenController);
 app.use("/api/feedback", require("./routes/feedback"));
 // USER ROUTES
 app.use("/api/user", require("./routes/user"));
+app.use("/api/upvote", require("./routes/upvote"));
 
 // DEFAULT ROUTE OF REQUESTS FOR UNDEFINED ROUTES AND METHODS
 app.all("*", (req, res, next) => {

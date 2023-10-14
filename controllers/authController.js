@@ -34,19 +34,27 @@ const login = catchAsync(async function (req, res, next) {
   // CHECK IF THE PROVIDED PASSWORD IS THE SAME AS THE ONE SAVED INTO THE DB
   if (!match) throw new AppError("Password is not valid", 401);
 
+  const payload = {
+    userId: foundUser.id,
+    user: {
+      username: foundUser.username,
+      name: foundUser.name,
+      upvotes: foundUser.upvotes,
+      comments: foundUser.comments,
+      feedbacks: foundUser.feedbacks,
+      photo: foundUser.photo,
+    },
+  };
+
   // GENERATE ACCESS TOKEN
-  const accessToken = jwt.sign(
-    { userId: foundUser.id },
-    process.env.JWT_ACCESS_TOKEN_SALT,
-    { expiresIn: "1h" }
-  );
+  const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_TOKEN_SALT, {
+    expiresIn: "1h",
+  });
 
   // GENERATE REFRESH TOKEN
-  const refreshToken = jwt.sign(
-    { userId: foundUser.id },
-    process.env.JWT_REFRESH_TOKEN_SALT,
-    { expiresIn: "1d" }
-  );
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_TOKEN_SALT, {
+    expiresIn: "1d",
+  });
 
   // SAVE REFRESH TOKEN INTO THE DB
   foundUser.refreshToken = refreshToken;
@@ -56,23 +64,16 @@ const login = catchAsync(async function (req, res, next) {
   foundUser.refreshToken = undefined;
 
   // SEND REFRESH TOKEN AS HTTPY ONLY COOKIE
-  // res.cookie("jwt", refreshToken, {
-  //   expires: new Date(
-  //     Date.now() + process.env.JWT_REFRESH_TOKEN_EXPIRES_IN * 60 * 1000
-  //   ),
-  //   httpOnly: true,
-  //   sameSite: "none",
-  //   secure: true,
-  // });
-  res.setHeader(
-    "Set-Cookie",
-    `jwt=${refreshToken}; SameSite=None; Secure; HttpOnly; Expires=${new Date(
+  res.cookie("jwt", refreshToken, {
+    expires: new Date(
       Date.now() + process.env.JWT_REFRESH_TOKEN_EXPIRES_IN * 60 * 1000
-    )}`
-  );
+    ),
+    httpOnly: true,
+    secure: true,
+  });
 
   // SEND ACCESS TOKEN AS PART OF JSON WITH JWT KEY
-  res.status(200).json({ success: true, data: foundUser, jwt: accessToken });
+  res.status(200).json({ jwt: accessToken });
 });
 
 const logout = catchAsync(async function (req, res, next) {
@@ -93,9 +94,6 @@ const authorizeUser = catchAsync(async function (req, res, next) {
 
   const accessToken = authorization.split("Bearer ")[1];
 
-  if (!/.*\..*\..*/.test(accessToken))
-    throw new AppError("Token has been changed", 422);
-
   const verified = jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN_SALT);
 
   const { userId } = verified;
@@ -110,7 +108,6 @@ const authorizeUser = catchAsync(async function (req, res, next) {
 
 const refreshTokenController = catchAsync(async function (req, res, next) {
   const refreshToken = req.cookies.jwt;
-
   if (!refreshToken) throw new AppError("Authentication required", 401);
 
   const foundUser = await User.findOne({ refreshToken });
@@ -123,12 +120,20 @@ const refreshTokenController = catchAsync(async function (req, res, next) {
 
   if (foundUser.id !== userId) throw new AppError("Not authorized", 403);
 
-  const accessToken = jwt.sign(
-    { userId: foundUser.id },
-    process.env.JWT_ACCESS_TOKEN_SALT,
-    { expiresIn: "1h" }
-  );
-
+  const payload = {
+    userId: foundUser.id,
+    user: {
+      username: foundUser.username,
+      name: foundUser.name,
+      upvotes: foundUser.upvotes,
+      comments: foundUser.comments,
+      feedbacks: foundUser.feedbacks,
+      photo: foundUser.photo,
+    },
+  };
+  const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_TOKEN_SALT, {
+    expiresIn: "1h",
+  });
   res.status(200).json({ success: true, jwt: accessToken });
 });
 

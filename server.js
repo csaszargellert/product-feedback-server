@@ -34,7 +34,7 @@ mongoose.connection.on("disconnected", () =>
 const port = process.env.PORT || 3000;
 
 const server = app.listen(port, () => {
-  console.log(`App is listening on: http://127.0.0.1:${port}`);
+  console.log(`App is listening`);
 });
 
 process.on("SIGTERM", () => {

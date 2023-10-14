@@ -36,12 +36,10 @@ const handleCastError = function (error) {
 };
 
 const handleJWT = function (token) {
-  return new AppError(token.message, 401);
+  return new AppError(token.message, 403);
 };
 
 const globalErrorHandler = function (error, req, res, next) {
-  console.log(error.message);
-
   const copiedError = JSON.parse(JSON.stringify(error));
   copiedError.message = error.message;
 
@@ -64,7 +62,7 @@ const globalErrorHandler = function (error, req, res, next) {
     // ONLY RUNS WHEN THE ERROR SITUATION HAS ALREADY BEEN HANDLED GRACEFULLY AND A NEW APP ERROR HAS BEEN CREATED
     err = copiedError;
   }
-  res.status(err.statusCode).json({ success: false, data: err.message });
+  res.status(err.statusCode).json({ success: false, error: err.message });
 };
 
 module.exports = globalErrorHandler;
