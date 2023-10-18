@@ -1,11 +1,11 @@
 ## Built with
 
 * Bcryptjs
-* cookie-parser
-* cors
-* express
-* jsonwebtoken
-* mongoose
+* Cookie-parser
+* Cors
+* Express
+* Jsonwebtoken
+* Mongoose
 
 ## Links
 
